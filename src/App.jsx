@@ -1,94 +1,104 @@
 import { useState } from "react";
-
+import "./App.css";
+import NavTabs from "./NavTabs.jsx";
+import ProfilePage from "./ProfilePage.jsx";
+import JobsPage from "./JobsPage.jsx";
+import TrackerPage from "./TrackerPage.jsx";
+import initialJobs from "./dummyJobs.js";
 function App() {
-  const [activeTab, setActiveTab] = useState("profile");
+    const [activeTab, setActiveTab] = useState("profile");
+    const [cvText, setCvText] = useState("");
+    const [jobs, setJobs] = useState(initialJobs);
+    const [applications, setApplications] = useState([]);
+    const handleSaveProfile = () => {
+        if (!cvText.trim()) {
+            alert("Please paste your CV text before saving.");
+            return;
+        }
+        console.log("Saved CV text:", cvText);
+        alert("Profile saved (for now only in frontend).");
+    };
 
-  return (
-      <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
-        <header style={{ marginBottom: "16px" }}>
-          <h1>CareerPilot</h1>
-          <p>Simple career co-pilot frontend for our first hackathon.</p>
-        </header>
+    const handleAddApplication = (newApp) => {
+        setApplications((prev) => [
+            ...prev,
+            { ...newApp, id: prev.length + 1 },
+        ]);
+    };
 
-        {/* Tab buttons */}
-        <nav style={{ marginBottom: "16px" }}>
-          <button
-              onClick={() => setActiveTab("profile")}
-              style={{
-                marginRight: "8px",
-                padding: "8px 12px",
-                backgroundColor: activeTab === "profile" ? "#1976d2" : "#eeeeee",
-                color: activeTab === "profile" ? "white" : "black",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-          >
-            Profile
-          </button>
-          <button
-              onClick={() => setActiveTab("jobs")}
-              style={{
-                marginRight: "8px",
-                padding: "8px 12px",
-                backgroundColor: activeTab === "jobs" ? "#1976d2" : "#eeeeee",
-                color: activeTab === "jobs" ? "white" : "black",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-          >
-            Jobs
-          </button>
-          <button
-              onClick={() => setActiveTab("tracker")}
-              style={{
-                padding: "8px 12px",
-                backgroundColor: activeTab === "tracker" ? "#1976d2" : "#eeeeee",
-                color: activeTab === "tracker" ? "white" : "black",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-          >
-            Tracker
-          </button>
-        </nav>
+    const handleSearchJobs = (query) => {
+        const q = query.toLowerCase();
+        const filtered = initialJobs.filter(
+            (job) =>
+                job.title.toLowerCase().includes(q) ||
+                job.company.toLowerCase().includes(q) ||
+                job.location.toLowerCase().includes(q)
+        );
+        setJobs(filtered);
+    };
 
-        {/* Tab content */}
-        <main>
-          {activeTab === "profile" && (
-              <section>
-                <h2>Profile Page</h2>
-                <p>
-                  Here you will let the user (and Farnaz for testing) paste CV text
-                  and save their profile.
-                </p>
-              </section>
-          )}
+    const handleComputeFitScore = (job) => {
+        if (!cvText.trim()) {
+            alert("Please paste and save your CV in the Profile tab first.");
+            return;
+        }
 
-          {activeTab === "jobs" && (
-              <section>
-                <h2>Jobs Page</h2>
-                <p>
-                  Here you will show job cards, search by keywords, and later call
-                  the backend to fetch real jobs.
-                </p>
-              </section>
-          )}
+        const cvLower = cvText.toLowerCase();
+        const skills = job.skillsRequired || [];
+        let matched = 0;
 
-          {activeTab === "tracker" && (
-              <section>
-                <h2>Tracker Page</h2>
-                <p>
-                  Here you will track applications (Applied, Interviewing, Offer,
-                  Rejected) in simple lists.
-                </p>
-              </section>
-          )}
-        </main>
-      </div>
-  );
+        skills.forEach((skill) => {
+            if (cvLower.includes(skill.toLowerCase())) {
+                matched += 1;
+            }
+        });
+
+        const score =
+            skills.length === 0 ? 0 : Math.round((matched / skills.length) * 100);
+
+        alert(
+            `Fit score for "${job.title}" at "${job.company}" is ${score}%. ` +
+            `Matched ${matched} out of ${skills.length} skills.`
+        );
+    };
+    return (
+        <div className="app-container">
+            <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
+                <header style={{ marginBottom: "16px" }}>
+                    <h1>CareerPilot</h1>
+                    <p>Plan your career, track applications, and stay organized in one place.</p>
+                </header>
+
+                <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+                <main style={{ marginTop: "16px" }}>
+                    {activeTab === "profile" && (
+                        <ProfilePage
+                            cvText={cvText}
+                            setCvText={setCvText}
+                            onSaveProfile={handleSaveProfile}
+                        />
+                    )}
+
+                    {activeTab === "jobs" && (
+                        <JobsPage
+                            jobs={jobs}
+                            onSearchJobs={handleSearchJobs}
+                            onComputeFitScore={handleComputeFitScore}
+                        />
+                    )}
+
+                    {activeTab === "tracker" && (
+                        <TrackerPage
+                            jobs={jobs}
+                            applications={applications}
+                            onAddApplication={handleAddApplication}
+                        />
+                    )}
+                </main>
+            </div>
+        </div>
+    );
 }
 
 export default App;
