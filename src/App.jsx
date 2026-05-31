@@ -6,7 +6,7 @@ function App() {
   return (
       <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
         <header style={{ marginBottom: "16px" }}>
-          <h1>CareerPilot-Farnaz</h1>
+          <h1>CareerPilot</h1>
           <p>Simple career co-pilot frontend for our first hackathon.</p>
         </header>
 
