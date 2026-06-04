@@ -3,10 +3,7 @@ uvicorn
 python-multipart
 PyPDF2
 python-docx
-sentence-transformers
-chromadb
-openai
-langchain
 python-dotenv
 pydantic
 requests
+groq

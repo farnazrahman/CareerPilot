@@ -1,51 +1,28 @@
-import chromadb
-from sentence_transformers import SentenceTransformer
-
-
 class RAGEngine:
     def __init__(self):
-        self.client = chromadb.Client()
-        self.model = None
-        self.collections = {}
-
-    def _get_model(self):
-        if self.model is None:
-            self.model = SentenceTransformer("all-MiniLM-L6-v2")
-        return self.model
+        self.cv_stores = {}
 
     def create_cv_store(self, cv_id, cv_text):
-        collection = self.client.create_collection(name=f"cv_{cv_id}")
-
         chunks = self._chunk_text(cv_text)
-
-        model = self._get_model()
-        embeddings = model.encode(chunks)
-
-        collection.add(
-            embeddings=embeddings.tolist(),
-            documents=chunks,
-            ids=[f"chunk_{i}" for i in range(len(chunks))]
-        )
-
-        self.collections[cv_id] = collection
+        self.cv_stores[cv_id] = chunks
         return cv_id
 
     def query_cv(self, cv_id, query, n_results=3):
-        if cv_id not in self.collections:
-            collection = self.client.get_collection(name=f"cv_{cv_id}")
-            self.collections[cv_id] = collection
-        else:
-            collection = self.collections[cv_id]
+        chunks = self.cv_stores.get(cv_id, [])
+        if not chunks:
+            return []
 
-        model = self._get_model()
-        query_embedding = model.encode([query])
+        query_words = set(query.lower().split())
 
-        results = collection.query(
-            query_embeddings=query_embedding.tolist(),
-            n_results=n_results
-        )
+        scored_chunks = []
+        for chunk in chunks:
+            chunk_words = set(chunk.lower().split())
+            score = len(query_words.intersection(chunk_words))
+            scored_chunks.append((score, chunk))
 
-        return results["documents"][0]
+        scored_chunks.sort(reverse=True, key=lambda x: x[0])
+
+        return [chunk for score, chunk in scored_chunks[:n_results]]
 
     def _chunk_text(self, text, chunk_size=500):
         words = text.split()
