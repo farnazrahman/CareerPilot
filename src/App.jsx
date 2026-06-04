@@ -10,13 +10,14 @@ function App() {
     const [cvText, setCvText] = useState("");
     const [jobs, setJobs] = useState(initialJobs);
     const [applications, setApplications] = useState([]);
+    const [saveMessage, setSaveMessage] = useState("");
     const handleSaveProfile = () => {
         if (!cvText.trim()) {
             alert("Please paste your CV text before saving.");
             return;
         }
         console.log("Saved CV text:", cvText);
-        alert("Profile saved (for now only in frontend).");
+        setSaveMessage("Profile saved .");
     };
 
     const handleAddApplication = (newApp) => {
@@ -73,11 +74,18 @@ function App() {
 
                 <main style={{ marginTop: "16px" }}>
                     {activeTab === "profile" && (
-                        <ProfilePage
-                            cvText={cvText}
-                            setCvText={setCvText}
-                            onSaveProfile={handleSaveProfile}
-                        />
+                        <>
+                            <ProfilePage
+                                cvText={cvText}
+                                setCvText={setCvText}
+                                onSaveProfile={handleSaveProfile}
+                            />
+                            {saveMessage && (
+                                <p style={{ marginTop: "8px", color: "green" }}>
+                                    {saveMessage}
+                                </p>
+                            )}
+                        </>
                     )}
 
                     {activeTab === "jobs" && (

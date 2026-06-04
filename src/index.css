@@ -1,16 +1,16 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #f4f6fb; /* page background */
-  --border: #e5e4e7;
+  --text: #4b4658;
+  --text-h: #111827;
+  --bg: #f7f4ff; /* page background */
+  --border: #e0ddf0;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #7c3aed;
+  --accent-bg: rgba(124, 58, 237, 0.1);
+  --accent-border: rgba(124, 58, 237, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
-          rgba(0, 0, 0, 0.1) 0 10px 15px -3px,
-          rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+          rgba(0, 0, 0, 0.08) 0 10px 20px -3px,
+          rgba(0, 0, 0, 0.04) 0 4px 8px -4px;
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
   --heading: system-ui, "Segoe UI", Roboto, sans-serif;
@@ -75,5 +75,5 @@ code {
   font-size: 15px;
   line-height: 135%;
   padding: 4px 8px;
-  background: var(--code-bg);
+  background: var(--bg);
 }

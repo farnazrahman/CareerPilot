@@ -1,18 +1,42 @@
 import { useState } from "react";
+import { huntJobs } from './api/api';
 
 function JobsPage({ jobs, onSearchJobs, onComputeFitScore }) {
     const [query, setQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [backendJobs, setBackendJobs] = useState([]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onSearchJobs(query);
+
+        const cvId = localStorage.getItem('cv_id');
+
+        if (!cvId) {
+            alert('Please upload your CV first in the Profile page!');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await huntJobs(query, cvId);
+            console.log('Jobs from backend:', response);
+            setBackendJobs(response.jobs);
+        } catch (error) {
+            console.error('Job search error:', error);
+            alert('Failed to search jobs. Make sure the backend is running!');
+        } finally {
+            setLoading(false);
+        }
     };
+
+    const displayJobs = backendJobs.length > 0 ? backendJobs : jobs;
 
     return (
         <section>
             <h2>Job Hunter</h2>
             <p>
-                Search for jobs and see simple fit scores based on your CV skills.
+                Search for jobs and see AI-powered fit scores based on your CV.
             </p>
 
             <form onSubmit={handleSubmit} style={{ marginBottom: "12px" }}>
@@ -25,58 +49,67 @@ function JobsPage({ jobs, onSearchJobs, onComputeFitScore }) {
                 />
                 <button
                     type="submit"
+                    disabled={loading}
                     style={{
                         padding: "8px 16px",
-                        backgroundColor: "#1976d2",
+                        backgroundColor: loading ? "#cccccc" : "#1976d2",
                         color: "white",
                         border: "none",
                         borderRadius: "4px",
-                        cursor: "pointer",
+                        cursor: loading ? "not-allowed" : "pointer",
                     }}
                 >
-                    Search
+                    {loading ? "Searching..." : "Search"}
                 </button>
             </form>
 
-            {jobs.length === 0 && <p>No jobs found for this search.</p>}
+            {displayJobs.length === 0 && !loading && <p>No jobs found. Try searching!</p>}
+
+            {loading && <p>🔍 Searching for jobs...</p>}
 
             <div>
-                {jobs.map((job) => (
-                    <div
-                        key={job.id}
-                        style={{
-                            border: "1px solid #cccccc",
-                            borderRadius: "4px",
-                            padding: "12px",
-                            marginBottom: "8px",
-                        }}
-                    >
-                        <h3>
-                            {job.title} – {job.company}
-                        </h3>
-                        <p>
-                            Location: {job.location} | Salary: {job.salaryRange} | Deadline:{" "}
-                            {job.deadline}
-                        </p>
-                        <p>
-                            Skills required:{" "}
-                            {job.skillsRequired && job.skillsRequired.join(", ")}
-                        </p>
-                        <button
-                            onClick={() => onComputeFitScore(job)}
+                {backendJobs.length > 0 ? (
+                    backendJobs.map((job, index) => (
+                        <div
+                            key={index}
                             style={{
-                                padding: "6px 12px",
-                                backgroundColor: "#388e3c",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
+                                border: "2px solid #1976d2",
+                                borderRadius: "8px",
+                                padding: "16px",
+                                marginBottom: "12px",
+                                backgroundColor: "#f5f5f5",
                             }}
                         >
-                            Compute Fit Score
-                        </button>
-                    </div>
-                ))}
+                            <h3>
+                                {job.role} – {job.company}
+                            </h3>
+                            <p>
+                                📍 Location: {job.location} | 💰 Salary: {job.salary_range || 'N/A'} | 📅 Deadline: {job.deadline || 'N/A'}
+                            </p>
+                            <p>
+                                <strong>Fit Score:</strong> {job.fit_score}/100
+                            </p>
+                            <p>
+                                <strong>Why this fits:</strong> {job.reasoning}
+                            </p>
+                        </div>
+                    ))
+                ) : (
+                    jobs.map((job, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                border: "1px solid #ccc",
+                                borderRadius: "4px",
+                                padding: "12px",
+                                marginBottom: "8px",
+                            }}
+                        >
+                            <h4>{job.title}</h4>
+                            <p>{job.company}</p>
+                        </div>
+                    ))
+                )}
             </div>
         </section>
     );
