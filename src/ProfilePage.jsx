@@ -1,38 +1,45 @@
-import { uploadCV } from './api/api';
-import { useState } from 'react';
+import { useState } from "react";
+import { uploadCV } from "./api/api";
 
-function ProfilePage({ cvText, setCvText, onSaveProfile }) {
+function ProfilePage({
+                         cvText,
+                         setCvText,
+                         onSaveProfile,
+                         cvId,
+                         setCvId,
+                     }) {
     const [uploading, setUploading] = useState(false);
-    const [uploadStatus, setUploadStatus] = useState('');
+    const [uploadStatus, setUploadStatus] = useState("");
+    const [selectedFileName, setSelectedFileName] = useState("");
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
 
         if (!file) return;
 
-        // Check file type
-        const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        setSelectedFileName(file.name);
+
+        const validTypes = [
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ];
+
         if (!validTypes.includes(file.type)) {
-            alert('Please upload a PDF or DOCX file');
+            setUploadStatus("❌ Please upload a PDF or DOCX file.");
             return;
         }
 
         setUploading(true);
-        setUploadStatus('Uploading...');
+        setUploadStatus("Uploading and processing CV...");
 
         try {
             const response = await uploadCV(file);
-            console.log('CV uploaded!', response);
 
-            // Save cv_id for later use
-            localStorage.setItem('cv_id', response.cv_id);
-
-            setUploadStatus('✅ CV uploaded successfully!');
-            alert('CV uploaded and processed successfully!');
+            setCvId(response.cv_id);
+            setUploadStatus("✅ CV uploaded successfully!");
         } catch (error) {
-            console.error('Upload error:', error);
-            setUploadStatus('❌ Failed to upload CV');
-            alert('Failed to upload CV. Please try again.');
+            console.error("Upload error:", error);
+            setUploadStatus("❌ Failed to upload CV. Please try again.");
         } finally {
             setUploading(false);
         }
@@ -42,45 +49,81 @@ function ProfilePage({ cvText, setCvText, onSaveProfile }) {
         <section>
             <h2>Profile</h2>
 
-            {/* File Upload Section */}
-            <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
-                <h3>Upload CV (PDF or DOCX)</h3>
+            <div
+                style={{
+                    marginBottom: "24px",
+                    padding: "16px",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: "8px",
+                }}
+            >
+                <h3>Upload CV</h3>
+                <p>Upload your CV as a PDF or DOCX file so the backend can process it.</p>
+
                 <input
                     type="file"
                     accept=".pdf,.docx"
                     onChange={handleFileUpload}
                     disabled={uploading}
                     style={{
-                        padding: "8px",
                         marginTop: "8px",
+                        padding: "8px",
                     }}
                 />
+
+                {selectedFileName && (
+                    <p style={{ marginTop: "8px" }}>
+                        <strong>Selected file:</strong> {selectedFileName}
+                    </p>
+                )}
+
                 {uploadStatus && (
-                    <p style={{ marginTop: '8px', fontWeight: 'bold' }}>
+                    <p
+                        style={{
+                            marginTop: "8px",
+                            fontWeight: "bold",
+                            color: uploadStatus.startsWith("✅")
+                                ? "green"
+                                : uploadStatus.startsWith("❌")
+                                    ? "red"
+                                    : "#333",
+                        }}
+                    >
                         {uploadStatus}
+                    </p>
+                )}
+
+                {cvId && (
+                    <p style={{ marginTop: "8px", color: "#1976d2" }}>
+                        CV processed successfully. CV ID: {cvId}
                     </p>
                 )}
             </div>
 
-            {/* Text Paste Section (Optional/Fallback) */}
-            <div>
+            <div
+                style={{
+                    padding: "16px",
+                    backgroundColor: "#fafafa",
+                    borderRadius: "8px",
+                }}
+            >
                 <h3>Or Paste CV Text</h3>
                 <p>
-                    Paste your CV text here. For now, this stays only in the browser,
-                    later you can send it to the backend.
+                    This is a temporary fallback for your frontend. It saves only in the
+                    browser unless you later connect this text area to the backend too.
                 </p>
 
                 <textarea
                     value={cvText}
                     onChange={(e) => setCvText(e.target.value)}
                     rows={12}
+                    placeholder="Paste your CV or write a short summary..."
                     style={{
                         width: "100%",
                         marginTop: "8px",
                         padding: "8px",
                         fontFamily: "monospace",
                     }}
-                    placeholder="Paste your CV or write a short summary..."
                 />
 
                 <div style={{ marginTop: "8px" }}>
@@ -103,4 +146,4 @@ function ProfilePage({ cvText, setCvText, onSaveProfile }) {
     );
 }
 
-export default ProfilePage;;
+export default ProfilePage;

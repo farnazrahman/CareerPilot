@@ -5,19 +5,23 @@ import ProfilePage from "./ProfilePage.jsx";
 import JobsPage from "./JobsPage.jsx";
 import TrackerPage from "./TrackerPage.jsx";
 import initialJobs from "./dummyJobs.js";
+
 function App() {
     const [activeTab, setActiveTab] = useState("profile");
     const [cvText, setCvText] = useState("");
+    const [cvId, setCvId] = useState("");
     const [jobs, setJobs] = useState(initialJobs);
     const [applications, setApplications] = useState([]);
     const [saveMessage, setSaveMessage] = useState("");
+
     const handleSaveProfile = () => {
         if (!cvText.trim()) {
             alert("Please paste your CV text before saving.");
             return;
         }
+
         console.log("Saved CV text:", cvText);
-        setSaveMessage("Profile saved .");
+        setSaveMessage("Profile saved.");
     };
 
     const handleAddApplication = (newApp) => {
@@ -62,12 +66,16 @@ function App() {
             `Matched ${matched} out of ${skills.length} skills.`
         );
     };
+
     return (
         <div className="app-container">
             <div style={{ fontFamily: "sans-serif", padding: "16px" }}>
                 <header style={{ marginBottom: "16px" }}>
                     <h1>CareerPilot</h1>
-                    <p>Plan your career, track applications, and stay organized in one place.</p>
+                    <p>
+                        Plan your career, track applications, and stay organized in one
+                        place.
+                    </p>
                 </header>
 
                 <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -79,6 +87,8 @@ function App() {
                                 cvText={cvText}
                                 setCvText={setCvText}
                                 onSaveProfile={handleSaveProfile}
+                                cvId={cvId}
+                                setCvId={setCvId}
                             />
                             {saveMessage && (
                                 <p style={{ marginTop: "8px", color: "green" }}>
@@ -93,6 +103,7 @@ function App() {
                             jobs={jobs}
                             onSearchJobs={handleSearchJobs}
                             onComputeFitScore={handleComputeFitScore}
+                            cvId={cvId}
                         />
                     )}
 
@@ -101,6 +112,7 @@ function App() {
                             jobs={jobs}
                             applications={applications}
                             onAddApplication={handleAddApplication}
+                            cvId={cvId}
                         />
                     )}
                 </main>
